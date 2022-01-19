@@ -1,0 +1,12 @@
+name = IMS Placement Provider
+description = Fetch material placements from IMS and merge into FBS holdings
+package = Providers
+version = "7.x-1.0"
+core = "7.x"
+dependencies[] = ding_provider
+dependencies[] = fbs
+configure = admin/config/ding/ims
+files[] = lib/ims-client/ImsPlacement.php
+files[] = lib/ims-client/ImsException.php
+files[] = lib/ims-client/ImsService.php
+
