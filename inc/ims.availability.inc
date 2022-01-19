@@ -14,7 +14,7 @@
  * @return array
  *   Availability info.
  */
-function ding_ims_availability_items($provider_ids) {
+function ims_availability_items($provider_ids) {
     // Just call fbs availability items provider. Ims cannot contribute.
     return fbs_availability_items($provider_ids);
 }
@@ -28,17 +28,17 @@ function ding_ims_availability_items($provider_ids) {
  * @return array
  *   Holdings info.
  */
-function ding_ims_availability_holdings($provider_ids) {
+function ims_availability_holdings($provider_ids) {
     // Call fbs availability holdings provider.
     // $fbs_results is plural because it holds results for 
     // more that one faust-number ($provider_ids)
     $fbs_results = fbs_availability_holdings($provider_ids);
 
-    // If the ding_ims module is enabled we try to fetch ims placements
-    if (module_exists('ding_ims')) {
+    // If the ims module is enabled we try to fetch ims placements
+    if (module_exists('ims')) {
       try {
         // Fetch ims placements for all $provider_ids
-        $ims_results = ding_ims_placements($provider_ids);
+        $ims_results = ims_placements($provider_ids);
       }
       catch (Exception $e) {
         watchdog_exception('ims', $e);
@@ -62,7 +62,7 @@ function ding_ims_availability_holdings($provider_ids) {
 /**
  *  Merge ims placements into the holdingsdata from FBS.
  */
-function _ding_ims_merge_ims_placements(array $holdings, array $ims_placements) {
+function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
 
   // Fbs holdings arrays and ims holdings arrays are identical in structure.
   $holding_structure = array(

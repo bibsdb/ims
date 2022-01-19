@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administration interface for the ding_ims module.
+ * Administration interface for the ims module.
  *
  * Allows configuration of ims end-point and credentials.
  */
@@ -13,7 +13,7 @@
  *
  * @see system_settings_form()
  */
-function ding_ims_admin_settings_form($form, &$form_state) {
+function ims_admin_settings_form($form, &$form_state) {
   $form['ims'] = array(
     '#type' => 'fieldset',
     '#title' => t('IMS settings'),
@@ -23,36 +23,36 @@ function ding_ims_admin_settings_form($form, &$form_state) {
     '#tree' => FALSE,
   );
 
-  $form['ims']['ding_ims_wsdl_url'] = array(
+  $form['ims']['ims_wsdl_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Service URL'),
     '#description' => t('URL of the IMS webservice. The url template 
       looks like this: https://[library-short-name].lyngsoe-imms.com/ImsWs/soap/Ims4Ils?wsdl<br> 
       E.g. https://bibsdb.lyngsoe-imms.com/ImsWs/soap/Ims4Ils?wsdl'),
     '#required' => TRUE,
-    '#default_value' => variable_get('ding_ims_wsdl_url', ''),
+    '#default_value' => variable_get('ims_wsdl_url', ''),
   );
 
-  $form['ims']['ding_ims_username'] = array(
+  $form['ims']['ims_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username'),
     '#description' => t('Username of a user created in the IMS webclient. No privileges needs to be granted to the user.'),
     '#required' => TRUE,
-    '#default_value' => variable_get('ding_ims_username', ''),
+    '#default_value' => variable_get('ims_username', ''),
   );
 
-  $form['ims']['ding_ims_password'] = array(
+  $form['ims']['ims_password'] = array(
     '#type' => 'textfield',
     '#title' => t('Password'),
     '#description' => t('Password of the user.'),
     '#required' => TRUE,
-    '#default_value' => variable_get('ding_ims_password', ''),
+    '#default_value' => variable_get('ims_password', ''),
   );
 
-  $form['ims']['ding_ims_enable_logging'] = array(
+  $form['ims']['ims_enable_logging'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable logging'),
-    '#default_value' => variable_get('ding_ims_enable_logging', FALSE),
+    '#default_value' => variable_get('ims_enable_logging', FALSE),
   );
 
   return system_settings_form($form);

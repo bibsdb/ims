@@ -7,16 +7,16 @@
 /**
  * Implements hook_menu().
  */
-function ding_ims_menu() {
+function ims_menu() {
   $items = array();
 
-  $items['admin/config/ding/provider/ding_ims'] = array(
+  $items['admin/config/ding/provider/ims'] = array(
     'title' => 'IMS provider',
     'description' => 'Settings for the IMS service.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('ding_ims_admin_settings_form'),
+    'page arguments' => array('ims_admin_settings_form'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'ding_ims.admin.inc',
+    'file' => 'ims.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
 
@@ -26,13 +26,13 @@ function ding_ims_menu() {
 /**
  * Implements hook_ding_provider().
  */
-function ding_ims_ding_provider() {
+function ims_ding_provider() {
   return array(
     'title' => 'IMS: Ding provider',
     'provides' => array(
       'availability' => array(
         'prefix' => 'availability',
-        'file' => 'includes/ding_ims.availability.inc',
+        'file' => 'includes/ims.availability.inc',
       ),
     ),
   );
@@ -47,12 +47,12 @@ function ding_ims_ding_provider() {
  * @return array
  *   Placements info.
  */
-function ding_ims_placements($provider_ids) {
+function ims_placements($provider_ids) {
   
   // @todo Call the IMS Webservice. 
   /*
   try {
-    $service = new ImsService(variable_get('ding_ims_wsdl_url'), variable_get('ding_ims_username'), variable_get('ding_ims_password'));
+    $service = new ImsService(variable_get('ims_wsdl_url'), variable_get('ims_username'), variable_get('ims_password'));
 
     // Retrieve covers by PID.
     $retrieved = $service->getByFaustNumber($provider_ids);
