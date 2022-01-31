@@ -34,13 +34,13 @@ class ImsService {
 
     // Loop the faust numbers since the ims service only accepts one faust 
     // pr. request 
-    $placements = array();
+    $ims_placements = array();
     foreach($faust_numbers as $faust_number) {
       $response = $this->sendRequest($faust_number);
-      $placements[] = $this->extractPlacements($response);
+      $ims_placements[$faust_number] = $this->extractPlacements($response);
     }
 
-    return $placements;
+    return $ims_placements;
   }
 
   /**
@@ -59,13 +59,10 @@ class ImsService {
     // the ims service responds.
     $start_time = explode(' ', microtime());
 
-    // Start on the responds object.
-    $response = new stdClass();
-    $response->identifierInformation = array();
 
     // Try to get covers 40 at the time as the service has a limit.
     try {    
-      $data = $client->GetItemsOfBibliographicRecord(array(
+      $response = $client->GetItemsOfBibliographicRecord(array(
         'Credentials' => $auth_info,
         'BibliographicRecordId' => $faust_number,
       ));
@@ -83,10 +80,23 @@ class ImsService {
       watchdog('ims', 'Completed request', WATCHDOG_DEBUG, '(' . round($time, 3) . 's): Ids: %ids', array('%ids' => implode(', ', $ids)) . ' http://' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
     }
 
-    if (!is_array($response->identifierInformation)) {
-      $response->identifierInformation = array($response->identifierInformation);
+    return $response;
+  }
+
+  /**
+   * Extract the ims placement data from the data response.
+   */
+  protected function extractPlacements($response) {
+    $ims_placements = array();
+    
+    // Handle situation where ims response contains no materials 
+    $items = isset($response->Item) ? $response->Item : array();
+
+    // Add location array to array keyed by material number (itemid)
+    foreach ($items as $item) {
+      $ims_placements[$item->ItemId] = $item->Placement->LocationName;
     }
 
-    return $response;
+    return $ims_placements;    
   }
 }

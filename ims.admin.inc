@@ -54,6 +54,12 @@ function ims_admin_settings_form($form, &$form_state) {
     '#title' => t('Enable logging'),
     '#default_value' => variable_get('ims_enable_logging', FALSE),
   );
+  
+  $form['ims']['ims_hide_zero_holdings'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Filter away holdings with 0 available items'),
+    '#default_value' => variable_get('ims_hide_zero_holdings', FALSE),
+  );
 
   return system_settings_form($form);
 }

@@ -16,6 +16,7 @@
  */
 function ims_availability_items($provider_ids) {
     // Just call fbs availability items provider. Ims cannot contribute.
+    module_load_include('inc', 'fbs', 'includes/fbs.availability');
     return fbs_availability_items($provider_ids);
 }
 
@@ -32,6 +33,7 @@ function ims_availability_holdings($provider_ids) {
     // Call fbs availability holdings provider.
     // $fbs_results is plural because it holds results for 
     // more that one faust-number ($provider_ids)
+    module_load_include('inc', 'fbs', 'includes/fbs.availability');
     $fbs_results = fbs_availability_holdings($provider_ids);
 
     // If the ims module is enabled we try to fetch ims placements
@@ -53,9 +55,11 @@ function ims_availability_holdings($provider_ids) {
       // Fbs holdings for current faust
       $fbs_holdings = $fbs_result['holdings'];
       // Create and ajust holdings to acommodate ims_placements
-      $adjusted_holdings = _fbs_merge_ims_placements($fbs_holdings, $ims_result);
-      $fbs_results[$faust]['holdings'] = $adjusted_holdings;
+      $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
+      $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
     }
+
+    return $fbs_results;
   }
 }
 
@@ -74,12 +78,18 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
   );
   
   // Create an array to store the decremented fbs holdings
-  $adjusted_holdings = $holdings;
+  $fbs_adjusted_holdings = $holdings;
 
   // Create array to store new holdings items created based on ims placement
   $ims_holdings = array();
   // Loop fbs holdings for current faust
   foreach ($holdings as $holding_key => $holding) {
+
+    // TODO: When a shelf mark service becomes available it should be used.
+    // Alternatively the shelf mark code could be factored out of the fbs.availability code 
+    // so that it could be called independently. Right now our only choice is to assume 
+    // that the last element of fbs placement array is the shelf mark. 
+    $shelf_mark = end($holding['placement']);
 
     // Loop materials
     $materials = $holding['materials'];
@@ -97,7 +107,7 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
         // are displayed. There is lttle chance of that though, and 
         // the outcome is acceptable in these rare cases.
         $found = false;
-        foreach ($ims_holdings as $ims_holding) {
+        foreach ($ims_holdings as $key => $ims_holding) {
           $placement_without_shelf_mark = array_slice($ims_holding['placement'], 0, -1);
           if ($placement_without_shelf_mark == $ims_placement) {
             $found = true;
@@ -109,6 +119,8 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
             }
             // Add material
             $ims_holding['materials'][] = $material; 
+            // Save the modified ims_holding to the ims_holdings array
+            $ims_holdings[$key] = $ims_holding;
             break;
           }
         }
@@ -132,21 +144,38 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
         }
 
         // Adjust available and total of the fbs holding the material belongs to
-        $adjusted_holdings[$holding_key]['total_count']--;
+        $fbs_adjusted_holdings[$holding_key]['total_count']--;
+        // Remove material id from fbs holding - it now sits in the ims holding
+        $fbs_adjusted_holdings[$holding_key]['materials'] = array_udiff($materials, [$material], '_ims_compare_materials');
         // Decrease available count in holding if material is available
         if ($material['available']) {
-          $adjusted_holdings[$holding_key]['available_count']--;
+          $fbs_adjusted_holdings[$holding_key]['available_count']--;
+          // If available count reaches zero we are creating a "fake zero holding"
+          // placement. Lets remove it.
+          if ($fbs_adjusted_holdings[$holding_key]['available_count'] == 0) {
+            // unset() doesn't change array keys
+            unset($fbs_adjusted_holdings[$holding_key]);
+          }
         }
-        // Remove material
-        $adjusted_holdings[$holding_key]['materials'] = array_udiff($materials, [$material], '_fbs_compare_materials');
+
       }
     }
   }
+
+  // Filter away holdings with zero available items if the ims-setting says so  
+  if (variable_get('ims_hide_zero_holdings', FALSE)) {
+    foreach($fbs_adjusted_holdings as $holding_key => $holding) {
+      if ($fbs_adjusted_holdings[$holding_key]['available_count'] == 0) {
+        unset($fbs_adjusted_holdings[$holding_key]);
+      }  
+    }
+  }
+
   // Collect all holdings in one array
-  return array_merge($adjusted_holdings, $ims_holdings);
+  return array_merge($fbs_adjusted_holdings, $ims_holdings);
 }
 
-function _fbs_compare_materials($m1, $m2)
+function _ims_compare_materials($m1, $m2)
 {
     return $m1['material_id'] - $m2['material_id'];
 }

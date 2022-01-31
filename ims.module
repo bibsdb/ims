@@ -32,7 +32,7 @@ function ims_ding_provider() {
     'provides' => array(
       'availability' => array(
         'prefix' => 'availability',
-        'file' => 'includes/ims.availability.inc',
+        'file' => 'inc/ims.availability.inc',
       ),
     ),
   );
@@ -50,7 +50,6 @@ function ims_ding_provider() {
 function ims_placements($provider_ids) {
   
   // @todo Call the IMS Webservice. 
-  /*
   try {
     $service = new ImsService(variable_get('ims_wsdl_url'), variable_get('ims_username'), variable_get('ims_password'));
 
@@ -63,31 +62,6 @@ function ims_placements($provider_ids) {
     // Error in fetching, return no covers.
     return array();
   }
-  */
-  
-
-  // @todo Remove example 
-  // This is an example of what could be returned by the webservice.
-  // Faust 52673542 - Kvinderne fra Thy. 
-  // We pretend that two of 30 matrials are on display
-
-  
-  $retrieved = array(
-    "52673542" => array(
-      "5133663391" => array(
-          0 => "Biblioteket Sønderborg",
-          1 => "Niveau 2",
-          2 => "Voksenbibliotek",
-          3 => "Gallerivæggen ved fiktion"
-      ),
-      "5131171783" => array(
-        0 => "Biblioteket Sønderborg",
-        1 => "Niveau 2",
-        2 => "Voksenbibliotek",
-        3 => "Gallerivæggen ved fiktion"
-    ),
-    )
-  );
- 
+   
   return $retrieved;
 }
