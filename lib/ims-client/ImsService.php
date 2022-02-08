@@ -60,7 +60,7 @@ class ImsService {
     $start_time = explode(' ', microtime());
 
 
-    // Try to get covers 40 at the time as the service has a limit.
+    // Fetch placements from IMS SOAP Webservice
     try {    
       $response = $client->GetItemsOfBibliographicRecord(array(
         'Credentials' => $auth_info,
@@ -75,9 +75,9 @@ class ImsService {
     $stop_time = explode(' ', microtime());
     $time = floatval(($stop_time[1] + $stop_time[0]) - ($start_time[1] + $start_time[0]));
 
-    // Drupal specific code - consider moving this elsewhere.
+    // Write entry to watchdog if logging is enabled for the ims-module
     if (variable_get('ims_enable_logging', FALSE)) {
-      watchdog('ims', 'Completed request', WATCHDOG_DEBUG, '(' . round($time, 3) . 's): Ids: %ids', array('%ids' => implode(', ', $ids)) . ' http://' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+      watchdog('ims', 'IMS WS Response: %response, Duration: %time s.', array('%response' => print_r($response, true), '%time' => round($time, 3)), WATCHDOG_DEBUG, $link = NULL);
     }
 
     return $response;
@@ -90,7 +90,18 @@ class ImsService {
     $ims_placements = array();
     
     // Handle situation where ims response contains no materials 
-    $items = isset($response->Item) ? $response->Item : array();
+    if (!isset($response->Item)) {
+      $items = array();
+    }
+    // If response contains only one material it's not wrapped in an array. Let's wrap it. 
+    elseif (!is_array($response->Item)) {
+      $items = array($response->Item);
+    }
+    //If response contains multiple materials it's ready to loop
+    else {
+      $items = $response->Item;
+    }
+   
 
     // Add location array to array keyed by material number (itemid)
     foreach ($items as $item) {
