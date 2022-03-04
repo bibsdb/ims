@@ -52,11 +52,25 @@ function ims_availability_holdings($provider_ids) {
     foreach ($fbs_results as $faust => $fbs_result) {
       // Ims placements for current faust
       $ims_result = $ims_results[$faust];
-      // Fbs holdings for current faust
-      $fbs_holdings = $fbs_result['holdings'];
-      // Create and ajust holdings to acommodate ims_placements
-      $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
-      $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
+      // Adjust fbs holdings for a periodical
+      // They have holdings pr. volume for each issue. They must be iterated.
+      if ($fbs_result['is_periodical']) {
+        $issues = $fbs_result['issues'];
+        // We need to adjust holdings for each volume in each issue
+        foreach ($issues as $issue_key => $volumes)  {
+          foreach ($volumes as $volume_key => $volume) {
+            $fbs_adjusted_holdings = _ims_merge_ims_placements($volume['placement'], $ims_result);
+            $fbs_results[$faust]['issues'][$issue_key][$volume_key]['placement'] = $fbs_adjusted_holdings;
+          }
+        }
+      }
+      else {
+        // Adjust Fbs holdings for a monography
+        $fbs_holdings = $fbs_result['holdings'];
+        // Create and ajust holdings to acommodate ims_placements
+        $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
+        $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
+      }
     }
 
     return $fbs_results;
@@ -68,13 +82,15 @@ function ims_availability_holdings($provider_ids) {
  */
 function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
 
-  // Fbs holdings arrays and ims holdings arrays are identical in structure.
+  // Skeleton used to create new holdings arrays.
   $holding_structure = array(
     'available_count' => 0,
     'total_count' => 0,
     'reference_count' => 0,
     'placement' => array(),
     'materials' => array(),
+    'reservable' => FALSE, // Filled for periodicals only 
+    'location' => "", // Filled for periodicals only
   );
   
   // Create an array to store the decremented fbs holdings
@@ -85,6 +101,13 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
   // Loop fbs holdings for current faust
   foreach ($holdings as $holding_key => $holding) {
 
+    // Only recent versions of the FBS provider returns material numbers.
+    // Without them we can do nothing. README.md explains dependencies.
+    // Handle situation where ims module is installed in incompatible environment
+    if (!array_key_exists('materials', $holding)) {
+      return $holdings;
+    }
+    
     // TODO: When a shelf mark service becomes available it should be used.
     // Alternatively the shelf mark code could be factored out of the fbs.availability code 
     // so that it could be called independently. Right now our only choice is to assume 
@@ -140,6 +163,11 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
           $ims_holding['placement'] = $ims_placement;
           // Add shelf mark as the last element
           $ims_holding['placement'][] = $shelf_mark;
+          // Periodicals have the reservable flag also set on this level - lets just set it for all materials
+          $ims_holding['reservable'] = $holding['reservable']; //DO THE LOGIG
+          // Periodicals need come with a location string - lets just create it for all materials
+          $ims_holding['location'] = implode(' > ', $ims_holding['placement']);
+
           $ims_holdings[] = $ims_holding;
         }
 
