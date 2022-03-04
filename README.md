@@ -16,7 +16,13 @@ DDB CMS chooses one of them based on alphabetical order.
 The IMS module wins the game because "I" comes after "F" in the alphabet. So the name of the module is important.
 
 ## Dependencies
-* FBS
+This module requires the FBS-module from ding install profile version 7.x-6.5.0 og later to function.
+* ding version < 7.x-6.5.0: No support for ims-placements
+* ding-version = 7.x-6.5.0: Support for ims-placements (monographies only)
+* ding-version > 7.x-6.5.0: Support for ims-placements (monographies and periodicals)
+
+The module dependencies are:
+* FBS 
 * ding_provider
 
 ## Configuration.
