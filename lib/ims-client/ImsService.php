@@ -105,7 +105,10 @@ class ImsService {
 
     // Add location array to array keyed by material number (itemid)
     foreach ($items as $item) {
-      $ims_placements[$item->ItemId] = $item->Placement->LocationName;
+      // A string - not an array - is returned if the placement of a material is only one level deep.
+      // It's a rare case observed when a material belongs to an "opstillingsgruppe" with no attached location.
+      // We need to make sure the placement is of type array.
+      $ims_placements[$item->ItemId] = (array)$item->Placement->LocationName;
     }
 
     return $ims_placements;    
