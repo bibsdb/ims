@@ -47,7 +47,7 @@ function ims_availability_holdings(array $provider_ids) {
     }
     catch (Exception $e) {
       watchdog_exception('ims', $e);
-      // Could't get data from IMS. Return results from fbs.
+      // Could't get data from IMS. Just quietly return results from fbs.
       return $fbs_results;
     }
 

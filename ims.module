@@ -56,11 +56,9 @@ function ims_placements(array $provider_ids) {
     // Retrieve placements for multiple ting object ids.
     $retrieved = $service->getByFaustNumber($provider_ids);
   }
-  catch (Exception $e) {
-    watchdog('ims', 'Unable to retrieve placements from IMS: %message', array('%message' => $e->getMessage()), WATCHDOG_ERROR);
-
-    // Return empty array when no placements where retrieved.
-    return array();
+  catch (ImsException $e) {
+     // Re-throw Ims specific exception.
+    throw new ImsServiceException($e->getMessage());
   }
   return $retrieved;
 }
