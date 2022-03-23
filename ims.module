@@ -57,7 +57,7 @@ function ims_placements(array $provider_ids) {
     $retrieved = $service->getByFaustNumber($provider_ids);
   }
   catch (ImsException $e) {
-     // Re-throw Ims specific exception.
+    // Re-throw Ims specific exception.
     throw new ImsServiceException($e->getMessage());
   }
   return $retrieved;
