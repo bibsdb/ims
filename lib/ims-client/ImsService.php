@@ -98,7 +98,7 @@ class ImsService {
     }
     catch (Exception $e) {
       // Re-throw Ims specific exception.
-      throw new ImsException($e->getMessage());
+      throw new ImsException($e->getMessage(), $e->getCode(), $e);
     }
 
     $stop_time = explode(' ', microtime());
