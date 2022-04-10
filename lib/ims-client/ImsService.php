@@ -113,8 +113,7 @@ class ImsService {
           '%response' => print_r($response, TRUE),
           '%time' => round($time, 3),
         ),
-        WATCHDOG_DEBUG,
-        $link = NULL
+        WATCHDOG_DEBUG
       );
     }
 
