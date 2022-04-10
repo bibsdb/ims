@@ -74,7 +74,7 @@ class ImsService {
    * @return object
    *   SOAP Response object.
    *
-   * @throws ImsServiceException
+   * @throws ImsException
    */
   protected function sendRequest($faust_number) {
     $auth_info = array(
@@ -98,7 +98,7 @@ class ImsService {
     }
     catch (Exception $e) {
       // Re-throw Ims specific exception.
-      throw new ImsServiceException($e->getMessage());
+      throw new ImsException($e->getMessage());
     }
 
     $stop_time = explode(' ', microtime());

@@ -8,4 +8,4 @@
 /**
  * Exception related to communication with the IMS SOAP Webservice.
  */
-class ImsServiceException extends Exception {}
+class ImsException extends Exception {}
