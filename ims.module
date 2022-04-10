@@ -50,15 +50,10 @@ function ims_ding_provider() {
  */
 function ims_placements(array $provider_ids) {
   // Call the IMS Webservice.
-  try {
-    $service = new ImsService(variable_get('ims_wsdl_url'), variable_get('ims_username'), variable_get('ims_password'));
+  $service = new ImsService(variable_get('ims_wsdl_url'), variable_get('ims_username'), variable_get('ims_password'));
 
-    // Retrieve placements for multiple ting object ids.
-    $retrieved = $service->getByFaustNumber($provider_ids);
-  }
-  catch (ImsException $e) {
-    // Re-throw Ims specific exception.
-    throw new ImsServiceException($e->getMessage());
-  }
+  // Retrieve placements for multiple ting object ids.
+  $retrieved = $service->getByFaustNumber($provider_ids);
+
   return $retrieved;
 }
