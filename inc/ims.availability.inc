@@ -39,47 +39,44 @@ function ims_availability_holdings(array $provider_ids) {
   module_load_include('inc', 'fbs', 'includes/fbs.availability');
   $fbs_results = fbs_availability_holdings($provider_ids);
 
-  // If the ims module is enabled we try to fetch ims placements.
-  if (module_exists('ims')) {
-    try {
-      // Fetch ims placements for all $provider_ids.
-      $ims_results = ims_placements($provider_ids);
-    }
-    catch (Exception $e) {
-      watchdog_exception('ims', $e);
-      // Could't get data from IMS. Just quietly return results from fbs.
-      return $fbs_results;
-    }
-
-    // Loop each faust-number.
-    foreach ($fbs_results as $faust => $fbs_result) {
-      // Ims placements for current faust.
-      $ims_result = $ims_results[$faust];
-      // Periodicals have holdings pr. volume for each issue
-      // Requires extra iterations.
-      if ($fbs_result['is_periodical']) {
-        $issues = $fbs_result['issues'];
-        // We need to adjust holdings for each volume in each issue.
-        foreach ($issues as $issue_key => $volumes) {
-          foreach ($volumes as $volume_key => $volume) {
-            // Create and ajust holdings to fit in ims_placements.
-            $fbs_adjusted_holdings = _ims_merge_ims_placements($volume['placement'], $ims_result);
-            $fbs_results[$faust]['issues'][$issue_key][$volume_key]['placement'] = $fbs_adjusted_holdings;
-          }
-        }
-      }
-      // Monography.
-      else {
-        // Adjust Fbs holdings for a monography.
-        $fbs_holdings = $fbs_result['holdings'];
-        // Create and ajust holdings to fit in ims_placements.
-        $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
-        $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
-      }
-    }
-
+  try {
+    // Fetch ims placements for all $provider_ids.
+    $ims_results = ims_placements($provider_ids);
+  }
+  catch (Exception $e) {
+    watchdog_exception('ims', $e);
+    // Could't get data from IMS. Just quietly return results from fbs.
     return $fbs_results;
   }
+
+  // Loop each faust-number.
+  foreach ($fbs_results as $faust => $fbs_result) {
+    // Ims placements for current faust.
+    $ims_result = $ims_results[$faust];
+    // Periodicals have holdings pr. volume for each issue
+    // Requires extra iterations.
+    if ($fbs_result['is_periodical']) {
+      $issues = $fbs_result['issues'];
+      // We need to adjust holdings for each volume in each issue.
+      foreach ($issues as $issue_key => $volumes) {
+        foreach ($volumes as $volume_key => $volume) {
+          // Create and ajust holdings to fit in ims_placements.
+          $fbs_adjusted_holdings = _ims_merge_ims_placements($volume['placement'], $ims_result);
+          $fbs_results[$faust]['issues'][$issue_key][$volume_key]['placement'] = $fbs_adjusted_holdings;
+        }
+      }
+    }
+    // Monography.
+    else {
+      // Adjust Fbs holdings for a monography.
+      $fbs_holdings = $fbs_result['holdings'];
+      // Create and ajust holdings to fit in ims_placements.
+      $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
+      $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
+    }
+  }
+
+  return $fbs_results;
 }
 
 /**
