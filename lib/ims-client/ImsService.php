@@ -72,9 +72,7 @@ class ImsService {
    *   The faust number to query.
    *
    * @return object
-   *   SOAP Response object.
-   *
-   * @throws ImsServiceException
+   *   SOAP Response object.   *
    */
   protected function sendRequest($faust_number) {
     $auth_info = array(
@@ -90,16 +88,10 @@ class ImsService {
     $start_time = explode(' ', microtime());
 
     // Fetch placements from IMS SOAP Webservice.
-    try {
-      $response = $client->GetItemsOfBibliographicRecord(array(
-        'Credentials' => $auth_info,
-        'BibliographicRecordId' => $faust_number,
-      ));
-    }
-    catch (Exception $e) {
-      // Re-throw Ims specific exception.
-      throw new ImsServiceException($e->getMessage());
-    }
+    $response = $client->GetItemsOfBibliographicRecord(array(
+      'Credentials' => $auth_info,
+      'BibliographicRecordId' => $faust_number,
+    ));
 
     $stop_time = explode(' ', microtime());
     $time = floatval(($stop_time[1] + $stop_time[0]) - ($start_time[1] + $start_time[0]));
