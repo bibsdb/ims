@@ -172,7 +172,9 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
           $ims_holding['placement'][] = $shelf_mark;
           // Fbs periodical holdings have the reservable flag set on this level
           // also. We set it for all materials. It does no harm.
-          $ims_holding['reservable'] = $holding['reservable'];
+          if (isset($holding['reservable'])) {
+            $ims_holding['reservable'] = $holding['reservable'];
+          }
           // Fbs periodical holdings come with a location string. We set it for
           // all maerials. It does no harm.
           $ims_holding['location'] = implode(' > ', $ims_holding['placement']);
