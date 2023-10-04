@@ -72,6 +72,7 @@ function ims_availability_holdings(array $provider_ids) {
       $fbs_holdings = $fbs_result['holdings'];
       // Create and ajust holdings to fit in ims_placements.
       $fbs_adjusted_holdings = _ims_merge_ims_placements($fbs_holdings, $ims_result);
+      $fbs_adjusted_holdings = _ims_filter_out_zero_holdings($fbs_adjusted_holdings);
       $fbs_results[$faust]['holdings'] = $fbs_adjusted_holdings;
     }
   }
@@ -201,15 +202,6 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
     }
   }
 
-  // Filter away holdings with zero available items if the ims-setting says so.
-  if (variable_get('ims_hide_zero_holdings', FALSE)) {
-    foreach ($fbs_adjusted_holdings as $holding_key => $holding) {
-      if ($fbs_adjusted_holdings[$holding_key]['available_count'] == 0) {
-        unset($fbs_adjusted_holdings[$holding_key]);
-      }
-    }
-  }
-
   // Collect all holdings in one array.
   return array_merge($fbs_adjusted_holdings, $ims_holdings);
 }
@@ -219,4 +211,19 @@ function _ims_merge_ims_placements(array $holdings, array $ims_placements) {
  */
 function _ims_compare_materials($m1, $m2) {
   return $m1['material_id'] - $m2['material_id'];
+}
+
+/**
+ * Filter out holdings with zero available items.
+ */
+function _ims_filter_out_zero_holdings($holdings) {
+  // Filter out holdings with zero available items if the ims-setting says so.
+  if (variable_get('ims_hide_zero_holdings', FALSE)) {
+    foreach ($holdings as $holding_key => $holding) {
+      if ($holdings[$holding_key]['available_count'] == 0) {
+        unset($holdings[$holding_key]);
+      }
+    }
+  }
+  return $holdings;
 }
